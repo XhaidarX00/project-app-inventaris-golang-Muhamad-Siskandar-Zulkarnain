@@ -75,3 +75,14 @@ func (r *Repository) PutCategoryByIdRepo(category *category.Category) error {
 
 	return nil
 }
+
+func (r *Repository) DeletCategoryByIdRepo(id int) error {
+	query := `DELETE FROM categories WHERE id = $1`
+
+	_, err := r.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

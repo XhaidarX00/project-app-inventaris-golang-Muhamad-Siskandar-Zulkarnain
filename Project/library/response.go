@@ -2,6 +2,7 @@ package library
 
 import (
 	"encoding/json"
+	"main/model/manage"
 	"main/model/response"
 	"net/http"
 )
@@ -164,4 +165,16 @@ func StrucToJson(w http.ResponseWriter, function func() response.Response) {
 func StrucToJson2(w http.ResponseWriter, msg string, function func(msg string) response.Response) {
 	response := function(msg)
 	json.NewEncoder(w).Encode(response)
+}
+
+func ManageItemsResponse(item *manage.Item) manage.ResponseItem {
+	return manage.ResponseItem{
+		ID:             item.ID,
+		Name:           item.Name,
+		Category:       item.CategoryName,
+		PhotoURL:       item.PhotoURL,
+		Price:          item.Price,
+		PurchaseDate:   item.PurchaseDate,
+		TotalUsageDays: item.TotalUsageDays,
+	}
 }

@@ -18,10 +18,48 @@ CREATE TABLE inventory_items (
     name VARCHAR(200) NOT NULL,
     photo_url VARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
+    depreciated_rate DECIMAL(5, 2) NOT NULL DEFAULT 0.1, 
     purchase_date DATE DEFAULT CURRENT_DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+SELECT id, name, price, 
+       SUM(price * POWER(1 - depreciated_rate, 
+       DATE_PART('month', AGE(DATE_TRUNC('month', CURRENT_DATE), DATE_TRUNC('month', purchase_date))))) AS depreciated_value,
+       depreciated_rate * 100 AS depreciated_rate
+FROM inventory_items
+WHERE id = 7;
+
+
+SELECT 
+    SUM(price) AS total_investment,
+    SUM(price * POWER(1 - depreciated_rate, 
+        DATE_PART('month', AGE(DATE_TRUNC('month', CURRENT_DATE), DATE_TRUNC('month', purchase_date)))
+    )) AS total_depreciated_value
+FROM inventory_items;
+
+
+
+
+
+SELECT 
+    i.id, 
+    i.name, 
+    c.name AS category, 
+    i.purchase_date, 
+    (CURRENT_DATE - i.purchase_date) AS total_usage_days,
+    CASE 
+        WHEN (CURRENT_DATE - i.purchase_date) > 100 THEN true 
+        ELSE false 
+    END AS replacement_required
+FROM 
+    inventory_items i
+JOIN 
+    categories c ON c.id = i.category_id;
+
+
+
 
 
 CREATE TABLE users (
@@ -53,14 +91,14 @@ SELECT * FROM categories WHERE id = 1;
 
 UPDATE categories SET name = 'Peralatan Elektronik', updated_at = CURRENT_TIMESTAMP WHERE id = 1;
 
-DELETE FROM categories WHERE id = 1;
+DELETE FROM categories WHERE id = 3;
 
 -- Barang Inventaris
 
 SELECT * FROM inventory_items;
 
-INSERT INTO inventory_items (category_id, name, photo_url, price, purchase_date) 
-VALUES (1, 'Laptop Advan', 'https://example.com/laptop.jpg', 15000000, '2024-03-10');
+INSERT INTO inventory_items (category_id, name, photo_url, price, depreciated_rate, purchase_date) 
+VALUES (1, 'Kompor', 'https://example.com/laptop.jpg', 100000, 0.1, '2024-10-10');
 
 SELECT * FROM inventory_items WHERE id = 1;
 
@@ -90,6 +128,40 @@ SELECT id, name,
     + (DATE_PART('year', AGE(CURRENT_DATE, purchase_date::DATE)) * 12) AS total_months
 FROM inventory_items;
 
+
+SELECT 
+    SUM(price) AS total_investment,
+    SUM(price * (1 - depreciated_rate) * 
+        (DATE_PART('month', AGE(CURRENT_DATE, purchase_date::DATE)) 
+        + DATE_PART('year', AGE(CURRENT_DATE, purchase_date::DATE)) * 12)
+    ) AS depreciated_value
+FROM inventory_items;
+
+SELECT id, name, price, (1 - depreciated_rate) * 
+        (DATE_PART('month', AGE(CURRENT_DATE, purchase_date::DATE)) 
+        + DATE_PART('year', AGE(CURRENT_DATE, purchase_date::DATE)) * 12) AS depreciated_value, depreciated_rate * 100 AS depreciated_rate
+FROM inventory_items
+WHERE id = 7;
+
+
+SELECT 
+    id, 
+    name, 
+    price,
+    CASE 
+        WHEN DATE_PART('month', AGE(CURRENT_DATE, purchase_date::DATE)) = 0 THEN price
+        ELSE price * (depreciated_rate, DATE_PART('month', AGE(CURRENT_DATE, purchase_date::DATE)) 
+            + DATE_PART('year', AGE(CURRENT_DATE, purchase_date::DATE)) * 12)
+    END AS depreciated_value,
+    depreciated_rate * 100 AS depreciated_rate
+FROM inventory_items
+WHERE id = 7;
+
+"item_id": 1,
+        "name": "Laptop Lenovo Thinkpad",
+        "initial_price": 10000000,
+        "depreciated_value": 7000000,
+        "depreciation_rate": 10
 
 INSERT INTO users (username, password, email)
 VALUES

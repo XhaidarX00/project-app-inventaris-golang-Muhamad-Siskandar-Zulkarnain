@@ -21,7 +21,7 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 			if err.Error() == "Data not found" {
 				library.StrucToJson2(w, "Data not Found", library.NotFoundRequest)
 			} else {
-				library.StrucToJson2(w, "Gagal mengambil data kategori", library.InternalServerError)
+				library.StrucToJson2(w, "Gagal mengambil data barang inventaris", library.InternalServerError)
 			}
 			return
 		}
@@ -58,8 +58,6 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 func GetCategoryByIdHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		id := chi.URLParam(r, "id")
-
-		log.Println(id)
 		if id == "" {
 			library.StrucToJson2(w, "ID kategori tidak ditemukan", library.BadRequest2)
 			return
@@ -134,6 +132,40 @@ func PutCategoryByIdHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		library.ResponseToJson(w, "Kategori berhasil diperbarui", http.StatusOK, category)
+		return
+	}
+
+	library.StrucToJson(w, library.MethodNotAllowed)
+}
+
+func DeleteCategoryByIdHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "DELETE" {
+		id := chi.URLParam(r, "id")
+
+		log.Println(id)
+		if id == "" {
+			library.StrucToJson2(w, "ID kategori tidak ditemukan", library.BadRequest2)
+			return
+		}
+
+		// Konversi id menjadi integer
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			library.StrucToJson2(w, "ID kategori tidak valid", library.BadRequest2)
+			return
+		}
+
+		err = service.ServiceF.DeletCategoryByIdService(idInt)
+		if err != nil {
+			if err.Error() == "Data not found" {
+				library.StrucToJson2(w, "Kategori tidak ditemukan", library.NotFoundRequest)
+			} else {
+				library.StrucToJson2(w, "Gagal mengambil data kategori", library.InternalServerError)
+			}
+			return
+		}
+
+		library.ResponseToJson(w, "Kategori berhasil dihapus", http.StatusOK, nil)
 		return
 	}
 

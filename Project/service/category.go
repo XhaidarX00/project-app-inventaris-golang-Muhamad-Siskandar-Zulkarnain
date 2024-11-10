@@ -35,3 +35,11 @@ func (s *Service) PutCategoryByIdService(category *category.Category) error {
 	}
 	return nil
 }
+
+func (s *Service) DeletCategoryByIdService(id int) error {
+	err := s.Repo.DeletCategoryByIdRepo(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

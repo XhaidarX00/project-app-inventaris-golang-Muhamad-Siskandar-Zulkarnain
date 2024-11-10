@@ -3,6 +3,9 @@ package router
 import (
 	"log"
 	"main/controller/catagories"
+	"main/controller/invesment"
+	"main/controller/items"
+	"main/controller/reminder"
 	usershandler "main/controller/userHandler"
 	"main/library"
 	middlewaree "main/middleware"
@@ -24,25 +27,27 @@ func InitRoute() {
 			r.Route("/categories", func(r chi.Router) {
 				r.Get("/{id}", catagories.GetCategoryByIdHandler)
 				r.Put("/{id}", catagories.PutCategoryByIdHandler)
+				r.Delete("/{id}", catagories.DeleteCategoryByIdHandler)
 				r.Get("/", catagories.CategoryHandler)
 				r.Post("/", catagories.CategoryHandler)
 			})
 
-			// r.Route("/book", func(r chi.Router) {
-			// 	r.Get("/discount", bookstore.DiscountBookHandler)
-			// 	r.Route("/{bookID}", func(r chi.Router) {
-			// 		r.Get("/edit", bookstore.EditBookHandler)
-			// 		r.Post("/edit", bookstore.EditBookHandler)
-			// 		r.Get("/delete", bookstore.DeleteBookHandler)
-			// 	})
-			// })
+			r.Route("/items/", func(r chi.Router) {
+				r.Get("/{id}", items.GetInventoryItemByIdHandler)
+				r.Put("/{id}", items.UpdateInventoryItemByIdHandler)
+				r.Delete("/{id}", items.DeleteInventoryItemByIdHandler)
+				r.Post("/", items.AddInventoryItemHandler)
+				r.Get("/{page}/{limit}", items.GetItemsPaginated)
+			})
 
-			// r.Route("/order", func(r chi.Router) {
-			// 	r.Get("/", orders.OrderListHandler)
-			// 	r.Route("/{orderID}", func(r chi.Router) {
-			// 		r.Get("/detail", orders.OrderDetailHandler)
-			// 	})
-			// })
+			r.Route("/items/investment", func(r chi.Router) {
+				r.Get("/{id}", invesment.GetItemsInvesmentByIdHandler)
+				r.Get("/", invesment.GetItemsInvesmentHandler)
+			})
+
+			r.Route("/items/replacement-needed", func(r chi.Router) {
+				r.Get("/", reminder.GetItemsReplacementHandler)
+			})
 		})
 	})
 
