@@ -1,16 +1,18 @@
 package manage
 
+import "database/sql"
+
 // Struct untuk Data Item
 type Item struct {
-	ID               int     `json:"id"`
-	Name             string  `json:"name"`
-	Category         int     `json:"category_id"`
-	CategoryName     string  `json:"category_name"`
-	PhotoURL         string  `json:"photo_url"`
-	Price            float64 `json:"price"`
-	PurchaseDate     string  `json:"purchase_date"`
-	Depreciated_rate float64 `json:"depreciated_rate"`
-	TotalUsageDays   int     `json:"total_usage_days"`
+	ID               int            `json:"id"`
+	Name             string         `json:"name"`
+	Category         int            `json:"category_id"`
+	CategoryName     string         `json:"category_name"`
+	PhotoURL         sql.NullString `json:"photo_url"`
+	Price            float64        `json:"price"`
+	PurchaseDate     string         `json:"purchase_date"`
+	Depreciated_rate float64        `json:"depreciated_rate"`
+	TotalUsageDays   int            `json:"total_usage_days"`
 }
 
 type ResponseItem struct {

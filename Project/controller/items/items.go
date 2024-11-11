@@ -1,14 +1,19 @@
 package items
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"main/library"
 	"main/model/manage"
 	"main/model/response"
 	"main/service"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi"
 )
@@ -53,11 +58,18 @@ func GetItemsPaginated(w http.ResponseWriter, r *http.Request) {
 
 func AddInventoryItemHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+		baseUrl := "http://localhost:8080"
 		name := r.FormValue("name")
 		categoryIDStr := r.FormValue("category_id")
-		photoURL := r.FormValue("photo_url")
 		priceStr := r.FormValue("price")
 		purchaseDateStr := r.FormValue("purchase_date")
+		file, data, err := r.FormFile("photo_url")
+		if err != nil {
+			library.ResponseToJson(w, err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+
+		defer file.Close()
 
 		// Validasi dan konversi data
 		categoryID, err := strconv.Atoi(categoryIDStr)
@@ -73,18 +85,26 @@ func AddInventoryItemHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// purchaseDate, err := time.Parse("2006-01-02", purchaseDateStr)
+		// if err != nil {
+		// 	library.ResponseToJson(w, "Invalid purchase_date format. Use YYYY-MM-DD", http.StatusBadRequest, nil)
+		// 	return
+		// }
+
+		dst, err := os.Create(filepath.Join("asset/", data.Filename))
+		_, err = io.Copy(dst, file)
 		if err != nil {
-			library.ResponseToJson(w, "Invalid purchase_date format. Use YYYY-MM-DD", http.StatusBadRequest, nil)
+			library.ResponseToJson(w, err.Error(), http.StatusBadRequest, nil)
 			return
 		}
+		photo_url := strings.Join([]string{baseUrl, "asset/", data.Filename}, "")
 
 		// Membuat instance InventoryItem
 		item := manage.Item{
 			Name:         name,
 			Category:     categoryID,
-			PhotoURL:     photoURL,
 			Price:        price,
 			PurchaseDate: purchaseDateStr,
+			PhotoURL:     sql.NullString{String: photo_url, Valid: photo_url != ""},
 		}
 
 		err = service.ServiceF.AddInventoryItemService(&item)

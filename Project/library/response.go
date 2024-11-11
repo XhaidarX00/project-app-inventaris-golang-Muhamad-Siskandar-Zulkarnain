@@ -172,7 +172,7 @@ func ManageItemsResponse(item *manage.Item) manage.ResponseItem {
 		ID:             item.ID,
 		Name:           item.Name,
 		Category:       item.CategoryName,
-		PhotoURL:       item.PhotoURL,
+		PhotoURL:       item.PhotoURL.String,
 		Price:          item.Price,
 		PurchaseDate:   item.PurchaseDate,
 		TotalUsageDays: item.TotalUsageDays,
